@@ -2,7 +2,7 @@ import Hls from 'hls.js'
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { Play, Tv, LogOut, Search, AlertCircle, Loader2, Film, Clapperboard, Heart, ChevronLeft, Calendar, Info, Trash2, Plus, X, Subtitles, AudioLines, Cast, ExternalLink, LogIn } from 'lucide-react'
 import { auth, db } from '../firebase'
-import { signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged, User } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User } from 'firebase/auth'
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query } from 'firebase/firestore'
 
 enum OperationType {
@@ -285,6 +285,7 @@ export default function Home() {
       setError("Errore di configurazione Firebase. Controlla le impostazioni.")
       return
     }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser)
       setIsAuthReady(true)
@@ -321,10 +322,10 @@ export default function Home() {
     }
     try {
       const provider = new GoogleAuthProvider()
-      await signInWithRedirect(auth, provider)
-    } catch (error) {
+      await signInWithPopup(auth, provider)
+    } catch (error: any) {
       console.error("Google Login Error:", error)
-      setError("Errore durante l'accesso con Google.")
+      setError("Errore durante l'accesso con Google: " + error.message)
     }
   }
 
