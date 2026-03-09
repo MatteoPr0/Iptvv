@@ -321,7 +321,7 @@ export default function Home() {
     }
     try {
       const provider = new GoogleAuthProvider()
-      await signInWithPopup(auth, provider)
+      await signInWithRedirect(auth, provider)
     } catch (error) {
       console.error("Google Login Error:", error)
       setError("Errore durante l'accesso con Google.")
