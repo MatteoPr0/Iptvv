@@ -2,7 +2,7 @@ import Hls from 'hls.js'
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { Play, Tv, LogOut, Search, AlertCircle, Loader2, Film, Clapperboard, Heart, ChevronLeft, Calendar, Info, Trash2, Plus, X, Subtitles, AudioLines, Cast, ExternalLink, LogIn } from 'lucide-react'
 import { auth, db } from '../firebase'
-import { signInWithRedirect, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User } from 'firebase/auth'
+import { signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged, User } from 'firebase/auth'
 import { collection, doc, setDoc, deleteDoc, onSnapshot, query } from 'firebase/firestore'
 
 enum OperationType {
