@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users/{userId}/playlists
+    // Document ID: {playlistId}
+    // Fields:
+    //   - id: string (required) - Unique identifier for the playlist
+    //   - name: string (required) - Name of the playlist
+    //   - credentials: map (required) - Credentials for the playlist
+    //     - server: string
+    //     - username: string
+    //     - password: string
+    //     - proxyUrl: string
+    //   - userId: string (required, immutable) - The ID of the user who owns this playlist
+    //   - createdAt: number (required, immutable) - Timestamp when the playlist was created
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isValidPlaylist(data, userId) {
+      return hasOnlyAllowedFields(['id', 'name', 'credentials', 'userId', 'createdAt']) &&
+             data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.credentials is map &&
+             data.credentials.keys().hasOnly(['server', 'username', 'password', 'proxyUrl']) &&
+             data.credentials.server is string && data.credentials.server.size() < 500 &&
+             data.credentials.username is string && data.credentials.username.size() < 200 &&
+             data.credentials.password is string && data.credentials.password.size() < 200 &&
+             data.credentials.proxyUrl is string && data.credentials.proxyUrl.size() < 500 &&
+             data.userId == userId &&
+             data.createdAt is number;
+    }
+
+    match /users/{userId}/playlists/{playlistId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+                    hasRequiredFields(['id', 'name', 'credentials', 'userId', 'createdAt']) && 
+                    isValidPlaylist(request.resource.data, userId);
+      allow update: if isOwner(userId) && 
+                    hasRequiredFields(['id', 'name', 'credentials', 'userId', 'createdAt']) && 
+                    isValidPlaylist(request.resource.data, userId) &&
+                    areImmutableFieldsUnchanged(['userId', 'createdAt', 'id']);
+      allow delete: if isOwner(userId);
+    }
+  }
+}

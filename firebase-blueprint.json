@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "Playlist": {
+      "title": "Playlist",
+      "description": "A user's IPTV playlist",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the playlist"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the playlist"
+        },
+        "credentials": {
+          "type": "object",
+          "description": "Credentials for the playlist",
+          "properties": {
+            "server": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            },
+            "proxyUrl": {
+              "type": "string"
+            }
+          },
+          "required": ["server", "username", "password", "proxyUrl"]
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns this playlist"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp when the playlist was created"
+        }
+      },
+      "required": ["id", "name", "credentials", "userId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/playlists/{playlistId}": {
+      "schema": {
+        "$ref": "#/entities/Playlist"
+      },
+      "description": "Playlists owned by a specific user"
+    }
+  }
+}
